@@ -10,27 +10,31 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-
-    @IBOutlet weak var tableView: UITableView!
+class ComingSoonViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    var movies: [NSDictionary]?
+    
+    @IBOutlet weak var upcomingTableView: UITableView!
+    
+    var upcomingMovies: [NSDictionary]?
+    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.dataSource = self
-        tableView.delegate = self
-
+        upcomingTableView.dataSource = self
+        upcomingTableView.delegate = self
+        upcomingTableView.rowHeight = 110
+        
         // Do any additional setup after loading the view.
         
         // Initialize a UIRefreshControl
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
-        tableView.insertSubview(refreshControl, atIndex: 0)
-    
+        upcomingTableView.insertSubview(refreshControl, atIndex: 0)
+        
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/upcoming?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -52,8 +56,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                         data, options:[]) as? NSDictionary {
                             NSLog("response: \(responseDictionary)")
                             
-                            self.movies = responseDictionary["results"] as? [NSDictionary]
-                            self.tableView.reloadData()
+                            self.upcomingMovies = responseDictionary["results"] as? [NSDictionary]
+                            self.upcomingTableView.reloadData()
                             
                     }
                 }
@@ -61,23 +65,23 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         task.resume()
         
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let movies = movies {
-            return movies.count
+        if let upcomingMovies = upcomingMovies {
+            return upcomingMovies.count
         } else {
             return 0
         }
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
-        let movie = movies![indexPath.row]
+        let cell = tableView.dequeueReusableCellWithIdentifier("ComingSoonCell", forIndexPath: indexPath) as! ComingSoonCell
+        let movie = upcomingMovies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
         
@@ -97,7 +101,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         
         print("row \(indexPath.row)")
-
+        print(overview)
+        
         return cell
     }
     
@@ -108,7 +113,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         // ... Create the NSURLRequest (myRequest) ...
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/upcoming?api_key=\(apiKey)")
         let myRequest = NSURLRequest(URL: url!)
         
         // Configure session so that completion handler is executed on main UI thread
@@ -124,22 +129,22 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                 // ... Use the new data to update the data source ...
                 
                 // Reload the tableView now that there is new data
-                self.tableView.reloadData()
+                self.upcomingTableView.reloadData()
                 
                 // Tell the refreshControl to stop spinning
-                refreshControl.endRefreshing()	
+                refreshControl.endRefreshing()
         });
         task.resume()
     }
-
+    
     /*
     // MARK: - Navigation
-
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    // Get the new view controller using segue.destinationViewController.
+    // Pass the selected object to the new view controller.
     }
     */
-
+    
 }
